@@ -1,7 +1,9 @@
 'use client';
+
 import { useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import type { FormEvent } from 'react';
 
 export default function SignupPage() {
   const [username, setUsername] = useState('');
@@ -10,7 +12,7 @@ export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const handleSignup = async (e:any) => {
+  const handleSignup = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
@@ -19,8 +21,12 @@ export default function SignupPage() {
       const res = await axios.post('/api/auth/signup', { username, password });
       localStorage.setItem('userId', res.data.userId);
       router.push('/home-listings');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Signup failed. Please try again.');
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || 'Signup failed. Please try again.');
+      } else {
+        setError('An unexpected error occurred.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -28,7 +34,7 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <form 
+      <form
         onSubmit={handleSignup}
         className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 space-y-6 transition-all duration-300 hover:shadow-2xl"
       >
@@ -45,11 +51,12 @@ export default function SignupPage() {
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
               Username
             </label>
             <div className="relative">
               <input
+                id="username"
                 className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
                 placeholder="Enter your username"
                 value={username}
@@ -57,29 +64,30 @@ export default function SignupPage() {
                 required
               />
               <span className="absolute right-4 top-3 text-gray-400">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </span>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
               Password
             </label>
             <div className="relative">
               <input
+                id="password"
+                type="password"
                 className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
                 placeholder="••••••••"
-                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
               <span className="absolute right-4 top-3 text-gray-400">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
               </span>
             </div>
@@ -95,7 +103,12 @@ export default function SignupPage() {
         </button>
 
         <div className="text-center text-sm text-gray-500">
-          <p>By creating an account, you agree to our <a href="#" className="font-medium text-blue-600 hover:text-blue-500">Terms of Service</a></p>
+          <p>
+            By creating an account, you agree to our{' '}
+            <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
+              Terms of Service
+            </a>
+          </p>
         </div>
 
         <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">

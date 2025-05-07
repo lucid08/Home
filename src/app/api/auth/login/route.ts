@@ -3,11 +3,10 @@ import { users } from '@/lib/data';
 
 export async function POST(req: NextRequest) {
   const { username, password } = await req.json();
-//   console.log(password);
-  users.find(u => console.log(u));
-  
-  
-  const user = users.find(u => u.username === username && u.password === password);
+
+  const user = users.find(
+    (u) => u.username === username && u.password === password
+  );
 
   if (!user) {
     return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });

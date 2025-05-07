@@ -6,8 +6,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
-  const { homeId, userId, fromDate, toDate } = body;
+  const { homeId, userId, fromDate, toDate } = await req.json();
 
   const newBooking = {
     id: Date.now(),
@@ -18,6 +17,9 @@ export async function POST(req: NextRequest) {
   };
 
   bookings.push(newBooking);
-  return NextResponse.json({ message: 'Booking confirmed', booking: newBooking });
+
+  return NextResponse.json({
+    message: 'Booking confirmed',
+    booking: newBooking,
+  });
 }
- 

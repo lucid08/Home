@@ -1,7 +1,10 @@
 "use client";
+
 import { useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import type { FormEvent } from "react";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -10,19 +13,22 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const handleLogin = async (e: any) => {
+  const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
-    
+
     try {
       const res = await axios.post("/api/auth/login", { username, password });
-      console.log(res);
-      
+
       localStorage.setItem("userId", res.data.userId);
       router.push("/home-listings");
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Login failed. Please try again.");
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || "Login failed. Please try again.");
+      } else {
+        setError("An unexpected error occurred.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -30,9 +36,10 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <form 
+      <form
         onSubmit={handleLogin}
         className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 space-y-6 transition-all duration-300 hover:shadow-2xl"
+        noValidate
       >
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold text-gray-900">Welcome Back</h1>
@@ -40,23 +47,33 @@ export default function LoginPage() {
         </div>
 
         {error && (
-          <div className="bg-red-50 text-red-700 p-3 rounded-lg text-sm">
+          <div
+            className="bg-red-50 text-red-700 p-3 rounded-lg text-sm"
+            role="alert"
+          >
             {error}
           </div>
         )}
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="username"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Username
             </label>
             <div className="relative">
               <input
+                id="username"
+                name="username"
+                type="text"
                 className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
                 placeholder="Enter your username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
+                aria-label="Username"
               />
               <span className="absolute right-4 top-3 text-gray-400">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -67,17 +84,23 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Password
             </label>
             <div className="relative">
               <input
+                id="password"
+                name="password"
+                type="password"
                 className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
                 placeholder="••••••••"
-                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                aria-label="Password"
               />
               <span className="absolute right-4 top-3 text-gray-400">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -93,20 +116,26 @@ export default function LoginPage() {
           disabled={isLoading}
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isLoading ? 'Signing In...' : 'Sign In'}
+          {isLoading ? "Signing In..." : "Sign In"}
         </button>
 
         <div className="text-center text-sm text-gray-500">
-          <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
+          <Link
+            href="/forgot-password"
+            className="font-medium text-blue-600 hover:text-blue-500"
+          >
             Forgot password?
-          </a>
+          </Link>
         </div>
 
         <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
           <span>Don't have an account?</span>
-          <a href="/signup" className="font-medium text-blue-600 hover:text-blue-500">
+          <Link
+            href="/signup"
+            className="font-medium text-blue-600 hover:text-blue-500"
+          >
             Sign up
-          </a>
+          </Link>
         </div>
       </form>
     </div>
